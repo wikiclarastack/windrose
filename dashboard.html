@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wind Rose | Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://unpkg.com/lucide-static/font/lucide.css" rel="stylesheet">
+</head>
+<body class="dashboard-body">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>Wind Rose</h2>
+        </div>
+        <nav class="menu">
+            <a href="#" class="active"><i class="lc-layout-dashboard"></i> Dashboard</a>
+            <a href="#"><i class="lc-trending-up"></i> Investimentos</a>
+            <a href="#"><i class="lc-code"></i> Patch Notes</a>
+            <a href="#"><i class="lc-users"></i> Equipe</a>
+            <a href="#"><i class="lc-settings"></i> Admin</a>
+        </nav>
+        <button id="logout-btn" class="logout"><i class="lc-log-out"></i> Sair</button>
+    </aside>
+
+    <main class="content">
+        <header class="top-bar">
+            <h1>Visão Geral do Estúdio</h1>
+            <div class="user-profile">
+                <span id="user-name">Carregando...</span>
+                <img id="user-avatar" src="https://via.placeholder.com/40" alt="Avatar">
+            </div>
+        </header>
+
+        <section class="stats-grid">
+            <div class="stat-card animate-up">
+                <h3>Investimento Total</h3>
+                <p class="value">R$ 145.200</p>
+                <span class="trend pos">+12%</span>
+            </div>
+            <div class="stat-card animate-up" style="animation-delay: 0.1s;">
+                <h3>Versão Atual</h3>
+                <p class="value">v1.0.4-beta</p>
+                <span class="trend">Estável</span>
+            </div>
+            <div class="stat-card animate-up" style="animation-delay: 0.2s;">
+                <h3>Devs Ativos</h3>
+                <p class="value">08</p>
+                <span class="trend">Online</span>
+            </div>
+        </section>
+
+        <section class="recent-activity animate-up" style="animation-delay: 0.3s;">
+            <div class="card-header">
+                <h2>Últimas Atualizações</h2>
+                <button class="btn-sm">Nova Postagem</button>
+            </div>
+            <table class="modern-table">
+                <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Data</th>
+                        <th>Autor</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="updates-list">
+                    </tbody>
+            </table>
+        </section>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>
