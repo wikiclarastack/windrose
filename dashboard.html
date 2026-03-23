@@ -2,92 +2,103 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wind Rose | Painel de Controle</title>
+    <title>Wind Rose | Dashboard</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="dashboard-body">
+    <div class="bg-blur"></div>
     <div class="app-wrapper">
         <aside class="sidebar">
-            <div class="logo"><i data-lucide="wind"></i> WIND ROSE</div>
+            <div class="logo">WIND ROSE</div>
             <nav>
-                <div class="nav-link active" onclick="switchTab('home', this)"><i data-lucide="layout-grid"></i> Dashboard</div>
+                <div class="nav-link active" onclick="switchTab('home', this)"><i data-lucide="layout"></i> Dashboard</div>
                 <div class="nav-link" onclick="switchTab('invest', this)"><i data-lucide="coins"></i> Investimentos</div>
-                <div class="nav-link" onclick="switchTab('patch', this)"><i data-lucide="file-text"></i> Patch Notes</div>
-                <div class="nav-link" onclick="switchTab('chat', this)"><i data-lucide="message-square"></i> Chat Geral</div>
-                <div id="admin-nav" class="nav-link" style="display:none;" onclick="switchTab('admin', this)"><i data-lucide="shield-check"></i> Admin</div>
+                <div class="nav-link" onclick="switchTab('patch', this)"><i data-lucide="git-branch"></i> Patch Notes</div>
+                <div class="nav-link" onclick="switchTab('chat', this)"><i data-lucide="message-circle"></i> Chat</div>
+                <div id="admin-nav" class="nav-link" style="display:none;" onclick="switchTab('admin', this)"><i data-lucide="lock"></i> Admin</div>
             </nav>
-            <div style="margin-top: auto;">
-                <button id="logout-btn" class="nav-link" style="border:none; background:none; width:100%; color:#ff4b4b;">
-                    <i data-lucide="log-out"></i> Sair
-                </button>
+            <div class="user-info-side">
+                <img id="user-avatar-side" src="" alt="">
+                <div>
+                    <p id="user-name-side">Carregando...</p>
+                    <span id="user-role-tag">Visitante</span>
+                </div>
             </div>
+            <button id="logout-btn" class="nav-link logout-style"><i data-lucide="log-out"></i> Sair</button>
         </aside>
 
         <main class="main-content">
-            <div id="top-alert-banner" class="animate" style="display:none; background:rgba(0,178,255,0.1); border:1px solid var(--accent); padding:20px; border-radius:16px; margin-bottom:30px;">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div id="top-alert-banner" class="animate" style="display:none;">
+                <div class="alert-box">
                     <div>
-                        <strong style="color:var(--accent); text-transform:uppercase; font-size:12px;">Aviso do Estúdio</strong>
-                        <p id="alert-text" style="margin-top:5px; font-weight:600;"></p>
+                        <span class="badge-alert">SISTEMA</span>
+                        <p id="alert-text"></p>
                     </div>
-                    <small id="alert-author" style="opacity:0.5;"></small>
+                    <small id="alert-author"></small>
                 </div>
             </div>
 
             <section id="home" class="view active">
-                <h1>Olá, <span id="user-display-name">Desenvolvedor</span></h1>
-                <div class="stats-grid" style="margin-top:30px;">
-                    <div class="card"><p>Balanço Robux</p><div class="val">R$ <span id="total-robux">0</span></div></div>
-                    <div class="card"><p>Versão</p><div class="val" id="current-v" style="color:#fff">v0.0</div></div>
-                    <div class="card"><p>Sessão</p><div class="val" style="color:#00ff88">Ativa</div></div>
+                <h1 class="welcome-text">Painel Principal</h1>
+                <div class="stats-grid">
+                    <div class="card card-grad">
+                        <p>Total Robux</p>
+                        <div class="val">R$ <span id="total-robux">0</span></div>
+                    </div>
+                    <div class="card card-grad">
+                        <p>Notas de Versão</p>
+                        <div class="val" id="total-patches">0</div>
+                    </div>
+                    <div class="card card-grad">
+                        <p>Status da Equipe</p>
+                        <div class="val" style="color:#00ff88">Ativo</div>
+                    </div>
                 </div>
             </section>
 
             <section id="invest" class="view">
-                <h1>Gestão de Robux</h1>
-                <div class="card" style="max-width:450px; margin:25px 0;">
-                    <input type="text" id="inv-name" placeholder="Origem (Ex: Venda de Gamepass)">
+                <h1>Investimentos</h1>
+                <div class="card" style="max-width:450px; margin:20px 0;">
+                    <input type="text" id="inv-name" placeholder="Fonte do Investimento">
                     <input type="number" id="inv-amt" placeholder="Quantia em Robux">
-                    <button class="btn" onclick="addRobux()">Registrar Entrada</button>
+                    <button class="btn" onclick="addRobux()">Registrar</button>
                 </div>
-                <div class="card">
+                <div class="card table-container">
                     <table>
-                        <thead><tr><th>Origem</th><th>Valor</th><th>Data</th></tr></thead>
+                        <thead><tr><th>Origem</th><th>Quantia</th><th>Data</th></tr></thead>
                         <tbody id="table-body"></tbody>
                     </table>
                 </div>
             </section>
 
             <section id="patch" class="view">
-                <h1>Atualizações do Jogo</h1>
-                <div class="card" style="margin:25px 0;">
-                    <input type="text" id="p-title" placeholder="Versão (Ex: v1.0.2)">
-                    <textarea id="p-desc" rows="4" placeholder="Descreva as mudanças..."></textarea>
-                    <button class="btn" onclick="addPatch()">Publicar Notas</button>
+                <h1>Patch Notes</h1>
+                <div class="card" style="margin:20px 0;">
+                    <input type="text" id="p-title" placeholder="Tag da Versão">
+                    <textarea id="p-desc" rows="4" placeholder="Mudanças realizadas..."></textarea>
+                    <button class="btn" onclick="addPatch()">Publicar</button>
                 </div>
                 <div id="patches-container"></div>
             </section>
 
             <section id="chat" class="view">
-                <h1>Chat Interno</h1>
-                <div id="chat-box" class="card" style="height:50vh; overflow-y:auto; margin-top:20px; display:flex; flex-direction:column; gap:12px; padding:20px;"></div>
-                <div class="card" style="margin-top:10px; display:flex; gap:10px;">
-                    <input type="text" id="chat-input" placeholder="Escreva uma mensagem..." style="margin:0;">
-                    <button class="btn" onclick="sendMessage(false)" style="width:120px; margin:0;">Enviar</button>
-                    <button id="btn-chat-announcement" class="btn" onclick="sendMessage(true)" style="width:160px; margin:0; background:#f59e0b; display:none;">Aviso Chat</button>
+                <h1>Chat de Desenvolvedores</h1>
+                <div id="chat-box" class="card chat-card"></div>
+                <div class="chat-controls">
+                    <input type="text" id="chat-input" placeholder="Sua mensagem...">
+                    <button class="btn-send" onclick="sendMessage(false)"><i data-lucide="send"></i></button>
+                    <button id="btn-chat-announcement" class="btn-warn" onclick="sendMessage(true)" style="display:none;"><i data-lucide="alert-triangle"></i></button>
                 </div>
             </section>
 
             <section id="admin" class="view">
-                <h1>Painel Administrativo</h1>
-                <div class="card" style="margin-top:25px;">
-                    <h3>Criar Alerta de Dashboard</h3>
-                    <p style="color:var(--text-dim); font-size:14px; margin-bottom:15px;">Este aviso aparecerá no topo para todos os membros.</p>
-                    <textarea id="dash-alert-input" placeholder="Digite o aviso importante..."></textarea>
-                    <button class="btn" onclick="createDashAlert()">Enviar Alerta Global</button>
+                <h1>Administração</h1>
+                <div class="card">
+                    <h3>Alerta Global</h3>
+                    <textarea id="dash-alert-input" placeholder="Mensagem para toda a equipe..."></textarea>
+                    <button class="btn" onclick="createDashAlert()">Enviar para Dashboard</button>
                 </div>
             </section>
         </main>
