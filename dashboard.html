@@ -15,7 +15,7 @@
         <aside class="sidebar">
             <div class="logo">WIND ROSE</div>
             <nav>
-                <div class="nav-link active" onclick="switchTab('home', this)"><i data-lucide="layout"></i> Home</div>
+                <div class="nav-link active" onclick="switchTab('home', this)"><i data-lucide="layout"></i> Dashboard</div>
                 <div class="nav-link" onclick="switchTab('invest', this)"><i data-lucide="coins"></i> Finanças</div>
                 <div class="nav-link" onclick="switchTab('chat', this)"><i data-lucide="message-circle"></i> Chat</div>
                 <div id="admin-nav" class="nav-link" style="display:none;" onclick="switchTab('admin', this)"><i data-lucide="shield"></i> Admin</div>
@@ -31,27 +31,28 @@
         </aside>
 
         <main class="main-content">
+            <div id="top-alert-banner" class="animate" style="display:none; background:rgba(0,178,255,0.1); border:1px solid var(--accent); padding:20px; border-radius:15px; margin-bottom:25px;">
+                <p id="alert-text" style="font-weight:600;"></p>
+                <small id="alert-author" style="opacity:0.5"></small>
+            </div>
+
             <section id="home" class="view active">
-                <h1>Bem-vindo, <span id="welcome-name">Dev</span></h1>
+                <h1>Painel de Controle</h1>
                 <div class="stats-grid">
                     <div class="card card-grad"><p>Total Robux</p><div class="val">R$ <span id="total-robux">0</span></div></div>
-                    <div class="card card-grad"><p>Membros Online</p><div class="val" id="online-count-main">0</div></div>
-                </div>
-                <div id="top-alert-banner" class="card" style="margin-top:20px; display:none; border-left:5px solid #00b2ff;">
-                    <p id="alert-text" style="font-weight:600;"></p>
-                    <small id="alert-author" style="opacity:0.5"></small>
+                    <div class="card card-grad"><p>Desenvolvedores Online</p><div class="val" id="online-count-main">0</div></div>
                 </div>
             </section>
 
             <section id="invest" class="view">
-                <h1>Investimentos</h1>
-                <div class="card" style="max-width:400px; margin-bottom:20px;">
+                <h1>Investimentos (Robux)</h1>
+                <div class="card" style="max-width:400px; margin:20px 0;">
                     <input type="text" id="inv-name" placeholder="Fonte">
-                    <input type="number" id="inv-amt" placeholder="Valor">
+                    <input type="number" id="inv-amt" placeholder="Valor em Robux">
                     <button class="btn" onclick="addRobux()">Registrar</button>
                 </div>
                 <div class="card">
-                    <table><thead><tr><th>Fonte</th><th>Valor</th><th>Data</th></tr></thead><tbody id="table-body"></tbody></table>
+                    <table><thead><tr><th>Origem</th><th>Valor</th><th>Data</th></tr></thead><tbody id="table-body"></tbody></table>
                 </div>
             </section>
 
@@ -60,22 +61,24 @@
                     <div class="chat-main">
                         <div id="chat-box" class="card chat-card"></div>
                         <div class="chat-controls">
-                            <input type="text" id="chat-input" placeholder="Sua mensagem...">
+                            <input type="text" id="chat-input" placeholder="Digite @nome para mencionar...">
                             <button class="btn-send" onclick="sendMessage()"><i data-lucide="send"></i></button>
+                            <button id="btn-chat-announcement" class="btn-warn" onclick="sendMessage(true)" style="display:none;"><i data-lucide="alert-circle"></i></button>
                         </div>
                     </div>
                     <div class="online-sidebar">
-                        <h3>Online (<span id="online-count">0</span>)</h3>
+                        <h3>Online — <span id="online-count">0</span></h3>
                         <div id="user-list"></div>
                     </div>
                 </div>
             </section>
 
             <section id="admin" class="view">
-                <h1>Admin</h1>
+                <h1>Administração</h1>
                 <div class="card">
-                    <textarea id="dash-alert-input" placeholder="Novo alerta global..."></textarea>
-                    <button class="btn" onclick="createDashAlert()">Postar Alerta</button>
+                    <h3>Novo Alerta Global</h3>
+                    <textarea id="dash-alert-input" placeholder="Mensagem para o topo da dashboard..."></textarea>
+                    <button class="btn" onclick="createDashAlert()">Publicar Alerta</button>
                 </div>
             </section>
         </main>
