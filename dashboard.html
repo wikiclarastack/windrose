@@ -9,20 +9,21 @@
 </head>
 <body class="dashboard-body">
     <div class="bg-blur"></div>
+    <audio id="mention-sound" src="https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3"></audio>
+
     <div class="app-wrapper">
         <aside class="sidebar">
             <div class="logo">WIND ROSE</div>
             <nav>
                 <div class="nav-link active" onclick="switchTab('home', this)"><i data-lucide="layout"></i> Dashboard</div>
-                <div class="nav-link" onclick="switchTab('invest', this)"><i data-lucide="coins"></i> Investimentos</div>
-                <div class="nav-link" onclick="switchTab('patch', this)"><i data-lucide="git-branch"></i> Patch Notes</div>
+                <div class="nav-link" onclick="switchTab('invest', this)"><i data-lucide="coins"></i> Robux</div>
                 <div class="nav-link" onclick="switchTab('chat', this)"><i data-lucide="message-circle"></i> Chat</div>
-                <div id="admin-nav" class="nav-link" style="display:none;" onclick="switchTab('admin', this)"><i data-lucide="lock"></i> Admin</div>
+                <div id="admin-nav" class="nav-link" style="display:none;" onclick="switchTab('admin', this)"><i data-lucide="shield"></i> Admin</div>
             </nav>
-            <div class="user-info-side">
-                <img id="user-avatar-side" src="" alt="">
+            <div class="user-info-side" onclick="openMyProfile()" style="cursor:pointer">
+                <img id="user-avatar-side" src="" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
                 <div>
-                    <p id="user-name-side">Carregando...</p>
+                    <p id="user-name-side">...</p>
                     <span id="user-role-tag">Visitante</span>
                 </div>
             </div>
@@ -30,80 +31,47 @@
         </aside>
 
         <main class="main-content">
-            <div id="top-alert-banner" class="animate" style="display:none;">
-                <div class="alert-box">
-                    <div>
-                        <span class="badge-alert">SISTEMA</span>
-                        <p id="alert-text"></p>
+            <section id="chat" class="view">
+                <div class="chat-container">
+                    <div class="chat-main">
+                        <h1>Chat Interno</h1>
+                        <div id="chat-box" class="card chat-card"></div>
+                        <div class="chat-controls">
+                            <input type="text" id="chat-input" placeholder="Digite @ para mencionar...">
+                            <button class="btn-send" onclick="sendMessage()"><i data-lucide="send"></i></button>
+                        </div>
                     </div>
-                    <small id="alert-author"></small>
+                    <div class="online-list">
+                        <h3>Online — <span id="online-count">0</span></h3>
+                        <div id="user-list"></div>
+                    </div>
+                </div>
+            </section>
+
+            </main>
+    </div>
+
+    <div id="profile-modal" class="modal">
+        <div class="modal-content card">
+            <div id="profile-banner" class="profile-banner"></div>
+            <div class="profile-header">
+                <img id="profile-img" src="" class="profile-avatar">
+                <h2 id="profile-name">Nome</h2>
+                <span id="profile-badge" class="badge-alert">DEV</span>
+            </div>
+            <div class="profile-body">
+                <h4>Bio</h4>
+                <p id="profile-bio">...</p>
+                <h4>Especialidades</h4>
+                <p id="profile-specialties">...</p>
+                <div id="profile-edit-fields" style="display:none;">
+                    <textarea id="edit-bio" placeholder="Sua bio..."></textarea>
+                    <input type="text" id="edit-spec" placeholder="Suas especialidades...">
+                    <button class="btn" onclick="saveProfile()">Salvar Perfil</button>
                 </div>
             </div>
-
-            <section id="home" class="view active">
-                <h1 class="welcome-text">Painel Principal</h1>
-                <div class="stats-grid">
-                    <div class="card card-grad">
-                        <p>Total Robux</p>
-                        <div class="val">R$ <span id="total-robux">0</span></div>
-                    </div>
-                    <div class="card card-grad">
-                        <p>Notas de Versão</p>
-                        <div class="val" id="total-patches">0</div>
-                    </div>
-                    <div class="card card-grad">
-                        <p>Status da Equipe</p>
-                        <div class="val" style="color:#00ff88">Ativo</div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="invest" class="view">
-                <h1>Investimentos</h1>
-                <div class="card" style="max-width:450px; margin:20px 0;">
-                    <input type="text" id="inv-name" placeholder="Fonte do Investimento">
-                    <input type="number" id="inv-amt" placeholder="Quantia em Robux">
-                    <button class="btn" onclick="addRobux()">Registrar</button>
-                </div>
-                <div class="card table-container">
-                    <table>
-                        <thead><tr><th>Origem</th><th>Quantia</th><th>Data</th></tr></thead>
-                        <tbody id="table-body"></tbody>
-                    </table>
-                </div>
-            </section>
-
-            <section id="patch" class="view">
-                <h1>Patch Notes</h1>
-                <div class="card" style="margin:20px 0;">
-                    <input type="text" id="p-title" placeholder="Tag da Versão">
-                    <textarea id="p-desc" rows="4" placeholder="Mudanças realizadas..."></textarea>
-                    <button class="btn" onclick="addPatch()">Publicar</button>
-                </div>
-                <div id="patches-container"></div>
-            </section>
-
-            <section id="chat" class="view">
-                <h1>Chat de Desenvolvedores</h1>
-                <div id="chat-box" class="card chat-card"></div>
-                <div class="chat-controls">
-                    <input type="text" id="chat-input" placeholder="Sua mensagem...">
-                    <button class="btn-send" onclick="sendMessage(false)"><i data-lucide="send"></i></button>
-                    <button id="btn-chat-announcement" class="btn-warn" onclick="sendMessage(true)" style="display:none;"><i data-lucide="alert-triangle"></i></button>
-                </div>
-            </section>
-
-            <section id="admin" class="view">
-                <h1>Administração</h1>
-                <div class="card">
-                    <h3>Alerta Global</h3>
-                    <textarea id="dash-alert-input" placeholder="Mensagem para toda a equipe..."></textarea>
-                    <button class="btn" onclick="createDashAlert()">Enviar para Dashboard</button>
-                </div>
-            </section>
-        </main>
+            <button class="btn-warn" onclick="closeProfile()" style="margin-top:10px;">Fechar</button>
+        </div>
     </div>
-    <script src="script.js"></script>
-    <script>lucide.createIcons();</script>
 </body>
 </html>
