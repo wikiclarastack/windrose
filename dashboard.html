@@ -2,58 +2,54 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Wind Rose Studios | Painel</title>
+    <title>Wind Rose | Dashboard</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <aside class="sidebar">
-        <div class="logo">WIND ROSE</div>
-        <div class="nav-item active" onclick="switchTab('home')">Dashboard</div>
-        <div class="nav-item" onclick="switchTab('invest')">Investimentos</div>
-        <div class="nav-item" onclick="switchTab('patch')">Patch Notes</div>
-        <div id="logout-btn" class="nav-item" style="margin-top: auto; color: #ff4b4b;">Sair</div>
-    </aside>
+    <div class="app-wrapper">
+        <aside class="sidebar">
+            <div class="logo">WIND ROSE</div>
+            <div class="nav-link active" onclick="switchTab('home', this)">Dashboard</div>
+            <div class="nav-link" onclick="switchTab('invest', this)">Investimentos</div>
+            <div class="nav-link" onclick="switchTab('patch', this)">Patch Notes</div>
+            <div id="logout-btn" class="nav-link" style="margin-top:auto; color:#ff4b4b;">Sair</div>
+        </aside>
 
-    <main class="main-content">
-        <section id="home" class="tab-content active">
-            <h1>Visão Geral</h1>
-            <div class="stat-grid">
-                <div class="card">
-                    <p>Total em Robux</p>
-                    <div class="robux-val">R$ <span id="total-robux">0</span></div>
+        <main class="main-content">
+            <section id="home" class="view active">
+                <h1>Olá, <span id="user-name">...</span></h1>
+                <div class="stats-grid" style="margin-top:30px;">
+                    <div class="card"><p>Total Investido</p><div class="val">R$ <span id="total-robux">0</span></div></div>
+                    <div class="card"><p>Versão Atual</p><div class="val" id="current-v" style="color:#fff">v0.0</div></div>
+                    <div class="card"><p>Status</p><div class="val" style="color:#00ff88">Ativo</div></div>
                 </div>
-                <div class="card">
-                    <p>Atualizações</p>
-                    <div class="robux-val" id="total-updates" style="color: white">0</div>
+            </section>
+
+            <section id="invest" class="view">
+                <h1>Investimentos (Robux)</h1>
+                <div class="card" style="max-width:400px; margin: 25px 0;">
+                    <input type="text" id="inv-name" placeholder="Motivo/Origem">
+                    <input type="number" id="inv-amt" placeholder="Quantia em Robux">
+                    <button class="btn" onclick="addRobux()">Registrar</button>
                 </div>
-            </div>
-        </section>
+                <table>
+                    <thead><tr><th>Origem</th><th>Quantia</th><th>Data</th></tr></thead>
+                    <tbody id="table-body"></tbody>
+                </table>
+            </section>
 
-        <section id="invest" class="tab-content">
-            <h1>Investimentos (Robux)</h1>
-            <div class="card" style="max-width: 400px; margin-top: 20px;">
-                <input type="text" id="inv-name" placeholder="Nome do Investimento">
-                <input type="number" id="inv-amt" placeholder="Valor em Robux">
-                <button class="btn" onclick="saveInvestment()">Salvar</button>
-            </div>
-            <table>
-                <thead><tr><th>Nome</th><th>Quantia</th><th>Data</th></tr></thead>
-                <tbody id="table-inv"></tbody>
-            </table>
-        </section>
-
-        <section id="patch" class="tab-content">
-            <h1>Patch Notes</h1>
-            <div class="card" style="margin-top: 20px;">
-                <input type="text" id="p-title" placeholder="Título">
-                <textarea id="p-desc" placeholder="O que mudou?"></textarea>
-                <button class="btn" onclick="savePatch()">Publicar</button>
-            </div>
-            <div id="list-patches" style="margin-top: 20px;"></div>
-        </section>
-    </main>
-
+            <section id="patch" class="view">
+                <h1>Patch Notes</h1>
+                <div class="card" style="margin: 25px 0;">
+                    <input type="text" id="p-title" placeholder="Título do Patch (ex: v1.0)">
+                    <textarea id="p-desc" rows="4" placeholder="O que mudou?"></textarea>
+                    <button class="btn" onclick="addPatch()">Publicar Atualização</button>
+                </div>
+                <div id="patches-container"></div>
+            </section>
+        </main>
+    </div>
     <script src="script.js"></script>
 </body>
 </html>
