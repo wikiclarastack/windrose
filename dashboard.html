@@ -2,77 +2,58 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Wind Rose | Panel</title>
+    <title>Wind Rose Studios | Painel</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
-    <div class="app-container">
-        <aside class="sidebar">
-            <div class="logo"><i data-lucide="wind"></i> WIND ROSE</div>
-            <nav>
-                <div class="nav-link active" onclick="showTab('tab-home')"><i data-lucide="layout-grid"></i> Dashboard</div>
-                <div class="nav-link" onclick="showTab('tab-invest')"><i data-lucide="database"></i> Investimentos</div>
-                <div class="nav-link" onclick="showTab('tab-patch')"><i data-lucide="scroll"></i> Patch Notes</div>
-            </nav>
-            <div style="margin-top: auto;">
-                <button id="logout-btn" class="nav-link" style="border:none; background:none; width:100%"><i data-lucide="log-out"></i> Sair</button>
+    <aside class="sidebar">
+        <div class="logo">WIND ROSE</div>
+        <div class="nav-item active" onclick="switchTab('home')">Dashboard</div>
+        <div class="nav-item" onclick="switchTab('invest')">Investimentos</div>
+        <div class="nav-item" onclick="switchTab('patch')">Patch Notes</div>
+        <div id="logout-btn" class="nav-item" style="margin-top: auto; color: #ff4b4b;">Sair</div>
+    </aside>
+
+    <main class="main-content">
+        <section id="home" class="tab-content active">
+            <h1>Visão Geral</h1>
+            <div class="stat-grid">
+                <div class="card">
+                    <p>Total em Robux</p>
+                    <div class="robux-val">R$ <span id="total-robux">0</span></div>
+                </div>
+                <div class="card">
+                    <p>Atualizações</p>
+                    <div class="robux-val" id="total-updates" style="color: white">0</div>
+                </div>
             </div>
-        </aside>
+        </section>
 
-        <main class="main-content">
-            <section id="tab-home" class="tab-content active animate">
-                <header style="margin-bottom: 30px;">
-                    <h1>Bem-vindo, <span id="user-display">Dev</span></h1>
-                    <p style="color: var(--text-dim)">Status do Wind Rose Studios em tempo real.</p>
-                </header>
-                
-                <div class="stat-grid">
-                    <div class="card">
-                        <p style="color: var(--text-dim)">Investimento Robux</p>
-                        <h2 style="font-size: 2rem; margin-top: 10px;"><span class="robux-icon">R$</span> <span id="total-robux">0</span></h2>
-                    </div>
-                    <div class="card">
-                        <p style="color: var(--text-dim)">Patch Notes</p>
-                        <h2 id="count-patches" style="font-size: 2rem; margin-top: 10px;">0</h2>
-                    </div>
-                    <div class="card">
-                        <p style="color: var(--text-dim)">Status Servidor</p>
-                        <h2 style="font-size: 2rem; margin-top: 10px; color: #10b981;">Online</h2>
-                    </div>
-                </div>
-            </section>
+        <section id="invest" class="tab-content">
+            <h1>Investimentos (Robux)</h1>
+            <div class="card" style="max-width: 400px; margin-top: 20px;">
+                <input type="text" id="inv-name" placeholder="Nome do Investimento">
+                <input type="number" id="inv-amt" placeholder="Valor em Robux">
+                <button class="btn" onclick="saveInvestment()">Salvar</button>
+            </div>
+            <table>
+                <thead><tr><th>Nome</th><th>Quantia</th><th>Data</th></tr></thead>
+                <tbody id="table-inv"></tbody>
+            </table>
+        </section>
 
-            <section id="tab-invest" class="tab-content animate">
-                <h1>Gestão de Robux</h1>
-                <div class="card" style="margin-top: 20px; max-width: 500px;">
-                    <h3>Novo Registro</h3>
-                    <input type="text" id="inv-name" placeholder="Origem/Nome">
-                    <input type="number" id="inv-amt" placeholder="Quantidade em Robux">
-                    <button class="btn" onclick="saveInvestment()">Adicionar Robux</button>
-                </div>
+        <section id="patch" class="tab-content">
+            <h1>Patch Notes</h1>
+            <div class="card" style="margin-top: 20px;">
+                <input type="text" id="p-title" placeholder="Título">
+                <textarea id="p-desc" placeholder="O que mudou?"></textarea>
+                <button class="btn" onclick="savePatch()">Publicar</button>
+            </div>
+            <div id="list-patches" style="margin-top: 20px;"></div>
+        </section>
+    </main>
 
-                <div class="card" style="margin-top: 30px;">
-                    <table>
-                        <thead><tr><th>Nome</th><th>Quantia</th><th>Data</th></tr></thead>
-                        <tbody id="table-inv"></tbody>
-                    </table>
-                </div>
-            </section>
-
-            <section id="tab-patch" class="tab-content animate">
-                <h1>Patch Notes</h1>
-                <div class="card" style="margin-top: 20px;">
-                    <input type="text" id="patch-title" placeholder="Versão (ex: v1.2)">
-                    <textarea id="patch-desc" rows="4" placeholder="O que mudou no jogo?"></textarea>
-                    <button class="btn" onclick="savePatch()">Publicar Atualização</button>
-                </div>
-                <div id="patches-list" style="margin-top: 30px;"></div>
-            </section>
-        </main>
-    </div>
     <script src="script.js"></script>
-    <script>lucide.createIcons();</script>
 </body>
 </html>
