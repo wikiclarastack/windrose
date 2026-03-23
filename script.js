@@ -3,50 +3,12 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1485095056347103283/ZV7F4kjBoH8Pj2k6OECL8TnmBKggSYe5cIth-I-30rmjjEYw4QVoYO9GSkCpU2B5Ad__";
 
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-const ROLES = {
-    OWNER: "1419845373534670848",
-    LEADER: "1457134406555668500",
-    MODELER: "1457134482304925747",
-    SCRIPTER: "1457134516601622782"
-};
-
+const ROLES = { OWNER: "1419845373534670848", LEADER: "1457134406555668500", MODELER: "1457134482304925747", SCRIPTER: "1457134516601622782" };
 let currentUser = null;
 
-// NOTIFICAÇÕES
-function toast(msg) {
-    const host = document.getElementById('notification-host');
-    const t = document.createElement('div');
-    t.className = 'toast';
-    t.innerText = msg;
-    host.appendChild(t);
-    setTimeout(() => t.remove(), 4000);
-}
-
-// LOGIN WEBHOOK
-async function logToDiscord(user, role) {
-    await fetch(DISCORD_WEBHOOK, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            embeds: [{
-                title: "Login Detectado",
-                description: `**Usuário:** ${user}\n**Cargo:** ${role}\n**Status:** Online no Painel`,
-                color: 0x00b2ff,
-                timestamp: new Date()
-            }]
-        })
-    });
-}
-
-// LOGIN
+// Login
 const loginBtn = document.getElementById('login-btn');
-if(loginBtn) {
-    loginBtn.onclick = () => _supabase.auth.signInWithOAuth({ 
-        provider: 'discord', 
-        options: { scopes: 'identify guilds guilds.members.read', redirectTo: window.location.origin + '/dashboard.html' } 
-    });
-}
+if(loginBtn) loginBtn.onclick = () => _supabase.auth.signInWithOAuth({ provider: 'discord', options: { scopes: 'identify guilds guilds.members.read', redirectTo: window.location.origin + '/dashboard.html' } });
 
 function switchTab(t, el) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -55,106 +17,60 @@ function switchTab(t, el) {
     el.classList.add('active');
 }
 
-// GESTÃO DE DADOS
-async function addRobux() {
-    const n = document.getElementById('inv-name').value;
-    const v = document.getElementById('inv-amt').value;
-    if(!n || !v) return toast("Preencha todos os campos!");
-    await _supabase.from('investments').insert([{ name: n, value: v, date: new Date() }]);
-    toast("Investimento registrado!");
-    loadData();
-}
-
-async function addPatch() {
-    const t = document.getElementById('p-title').value;
-    const d = document.getElementById('p-desc').value;
-    if(!t || !d) return toast("Preencha todos os campos!");
-    await _supabase.from('updates').insert([{ title: t, description: d, date: new Date() }]);
-    toast("Patch Notes publicado!");
-    loadData();
-}
-
-async function createDashAlert() {
-    const c = document.getElementById('dash-alert-input').value;
-    await _supabase.from('dashboard_alerts').insert([{ content: c, author: currentUser.name }]);
-    toast("Alerta Global enviado!");
-}
-
-// CHAT REALTIME
-async function sendMessage(isAnn = false) {
-    const i = document.getElementById('chat-input');
-    if(!i.value) return;
-    await _supabase.from('messages').insert([{
-        user_id: currentUser.id, username: currentUser.name, avatar_url: currentUser.avatar, content: i.value, is_announcement: isAnn
-    }]);
-    i.value = "";
-}
-
-function displayMessage(m) {
-    const box = document.getElementById('chat-box');
-    if(!box) return;
-    let text = m.content;
-    if(currentUser && text.includes(`@${currentUser.name}`)) {
-        text = `<span class="mention">@${currentUser.name}</span> ` + text.replace(`@${currentUser.name}`, "");
-        if(m.user_id !== currentUser.id) document.getElementById('mention-sound').play();
-    }
-    const isSpecial = m.user_id === ROLES.OWNER || m.user_id === ROLES.LEADER;
-    box.innerHTML += `
-        <div class="user-item" style="background:rgba(255,255,255,0.02); margin-bottom:8px; border-left:3px solid ${m.is_announcement ? '#f59e0b' : 'transparent'}">
-            <img src="${m.avatar_url}" onclick="viewProfile('${m.user_id}')" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
-            <div style="flex:1">
-                <div style="display:flex; justify-content:space-between;">
-                    <strong style="color:${isSpecial ? '#00b2ff' : '#fff'}; font-size:12px;">${m.username}</strong>
-                    ${(currentUser.id === ROLES.OWNER) ? `<span onclick="deleteMsg('${m.id}')" style="color:red; cursor:pointer;">×</span>` : ''}
-                </div>
-                <p style="font-size:14px; opacity:0.8;">${text}</p>
-            </div>
-        </div>`;
-    box.scrollTop = box.scrollHeight;
-}
-
-// ONLINE SYSTEM
-async function updateOnline() {
-    if(!currentUser) return;
-    await _supabase.from('profiles').upsert({ id: currentUser.id, username: currentUser.name, avatar_url: currentUser.avatar, last_seen: new Date().toISOString() });
-}
-
-async function loadOnline() {
-    const { data } = await _supabase.from('profiles').select('*').gt('last_seen', new Date(Date.now() - 300000).toISOString());
-    if(data) {
-        document.getElementById('online-count').innerText = data.length;
-        document.getElementById('online-count-main').innerText = data.length;
-        document.getElementById('user-list').innerHTML = data.map(u => `
-            <div class="user-item" onclick="viewProfile('${u.id}')">
-                <img src="${u.avatar_url}">${u.username}
-            </div>`).join('');
-    }
-}
-
-// PERFIL
+// Perfil
 async function viewProfile(id) {
     const { data } = await _supabase.from('profiles').select('*').eq('id', id).single();
     if(data) {
         document.getElementById('profile-modal').style.display = 'flex';
-        document.getElementById('p-name').innerText = data.username;
-        document.getElementById('p-img').src = data.avatar_url;
-        document.getElementById('p-bio').innerText = data.bio || "Sem bio";
-        document.getElementById('p-spec').innerText = data.specialties || "Nenhuma";
-        document.getElementById('edit-area').style.display = (currentUser.id === id) ? 'block' : 'none';
+        document.getElementById('p-name-ui').innerText = data.username;
+        document.getElementById('p-avatar-ui').src = data.avatar_url || 'https://cdn.discordapp.com/embed/avatars/0.png';
+        document.getElementById('p-banner-ui').style.backgroundImage = `url(${data.banner_url || ''})`;
+        document.getElementById('p-bio-ui').innerText = data.bio || "Sem bio.";
+        document.getElementById('p-spec-ui').innerText = data.specialties || "Nenhuma.";
+        document.getElementById('edit-profile-btn').style.display = (currentUser.id === id) ? 'block' : 'none';
+        toggleEditProfile(false);
     }
 }
 
-async function saveProfile() {
-    const b = document.getElementById('edit-bio').value;
-    const s = document.getElementById('edit-spec').value;
-    await _supabase.from('profiles').update({ bio: b, specialties: s }).eq('id', currentUser.id);
-    toast("Perfil atualizado!");
+function toggleEditProfile(s) {
+    document.getElementById('p-view-mode').style.display = s ? 'none' : 'block';
+    document.getElementById('p-edit-mode').style.display = s ? 'block' : 'none';
+}
+
+async function saveProfileData() {
+    const avatar = document.getElementById('edit-avatar').value;
+    const banner = document.getElementById('edit-banner').value;
+    const bio = document.getElementById('edit-bio').value;
+    const spec = document.getElementById('edit-spec').value;
+    await _supabase.from('profiles').update({ avatar_url: avatar, banner_url: banner, bio: bio, specialties: spec }).eq('id', currentUser.id);
     location.reload();
 }
 
 function closeProfile() { document.getElementById('profile-modal').style.display = 'none'; }
 
-// LOAD DATA
+// Chat & Dados
+async function sendMessage() {
+    const i = document.getElementById('chat-input');
+    if(!i.value) return;
+    await _supabase.from('messages').insert([{ user_id: currentUser.id, username: currentUser.name, avatar_url: currentUser.avatar, content: i.value }]);
+    i.value = "";
+}
+
+function displayMessage(m) {
+    const b = document.getElementById('chat-box');
+    if(!b) return;
+    const isAdm = m.user_id === ROLES.OWNER || m.user_id === ROLES.LEADER;
+    b.innerHTML += `
+        <div class="user-item">
+            <img src="${m.avatar_url}" onclick="viewProfile('${m.user_id}')" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
+            <div>
+                <strong style="color:${isAdm ? '#00b2ff' : '#fff'}; cursor:pointer;" onclick="viewProfile('${m.user_id}')">${m.username}</strong>
+                <p style="font-size:14px; opacity:0.8;">${m.content}</p>
+            </div>
+        </div>`;
+    b.scrollTop = b.scrollHeight;
+}
+
 async function loadData() {
     const { data: invs } = await _supabase.from('investments').select('*').order('date', {ascending: false});
     const { data: patches } = await _supabase.from('updates').select('*').order('date', {ascending: false});
@@ -162,25 +78,25 @@ async function loadData() {
     
     if(invs) {
         let t = 0;
-        document.getElementById('table-body').innerHTML = invs.map(i => { t += parseInt(i.value); return `<tr><td>${i.name}</td><td style="color:#00b2ff">R$ ${i.value}</td><td>${new Date(i.date).toLocaleDateString()}</td></tr>` }).join('');
+        document.getElementById('table-body').innerHTML = invs.map(i => { t += parseInt(i.value); return `<tr><td>${i.name}</td><td>R$ ${i.value}</td><td>${new Date(i.date).toLocaleDateString()}</td></tr>` }).join('');
         document.getElementById('total-robux').innerText = t.toLocaleString();
     }
     if(patches) {
         if(patches.length > 0) document.getElementById('current-version').innerText = patches[0].title;
-        document.getElementById('patches-container').innerHTML = patches.map(p => `
-            <div class="card" style="margin-bottom:15px;">
-                <h3 style="color:#00b2ff">${p.title}</h3>
-                <p style="opacity:0.6; margin-top:10px;">${p.description}</p>
-            </div>`).join('');
+        document.getElementById('patches-container').innerHTML = patches.map(p => `<div class="card" style="margin-bottom:10px;"><h3>${p.title}</h3><p style="opacity:0.6">${p.description}</p></div>`).join('');
     }
     if(alerts && alerts.length > 0) {
         document.getElementById('top-alert-banner').style.display = 'block';
         document.getElementById('alert-text').innerText = alerts[0].content;
-        document.getElementById('alert-author').innerText = "Enviado por: " + alerts[0].author;
+        document.getElementById('alert-author').innerText = "Por: " + alerts[0].author;
     }
 }
 
-_supabase.channel('global').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, p => displayMessage(p.new)).subscribe();
+async function addRobux() { await _supabase.from('investments').insert([{ name: document.getElementById('inv-name').value, value: document.getElementById('inv-amt').value, date: new Date() }]); location.reload(); }
+async function addPatch() { await _supabase.from('updates').insert([{ title: document.getElementById('p-title').value, description: document.getElementById('p-desc').value, date: new Date() }]); location.reload(); }
+async function createDashAlert() { await _supabase.from('dashboard_alerts').insert([{ content: document.getElementById('dash-alert-input').value, author: currentUser.name }]); location.reload(); }
+
+_supabase.channel('room1').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, p => displayMessage(p.new)).subscribe();
 
 window.onload = async () => {
     const { data: { session } } = await _supabase.auth.getSession();
@@ -188,11 +104,10 @@ window.onload = async () => {
         const meta = session.user.user_metadata;
         const res = await fetch(`https://discord.com/api/users/@me/guilds/1457130952655503536/member`, { headers: { Authorization: `Bearer ${session.provider_token}` } });
         const member = await res.json();
-        
         let role = "Membro";
-        if(member.roles.includes(ROLES.LEADER)) role = "Leader Developer";
-        else if(member.roles.includes(ROLES.SCRIPTER)) role = "Scripter";
-        else if(member.roles.includes(ROLES.MODELER)) role = "Modelador";
+        if(member.roles?.includes(ROLES.LEADER)) role = "Leader Developer";
+        else if(member.roles?.includes(ROLES.SCRIPTER)) role = "Scripter";
+        else if(member.roles?.includes(ROLES.MODELER)) role = "Modelador";
         if(meta.provider_id === ROLES.OWNER) role = "Dono";
 
         currentUser = { id: meta.provider_id, name: meta.full_name, avatar: meta.avatar_url, role: role };
@@ -201,15 +116,11 @@ window.onload = async () => {
             document.getElementById('user-avatar-side').src = currentUser.avatar;
             document.getElementById('user-name-side').innerText = currentUser.name.split(' ')[0];
             document.getElementById('user-role-tag').innerText = currentUser.role;
+            document.getElementById('my-profile-trigger').onclick = () => viewProfile(currentUser.id);
+            if(currentUser.id === ROLES.OWNER || currentUser.role === "Leader Developer") document.getElementById('admin-nav').style.display = 'flex';
             
-            if(currentUser.id === ROLES.OWNER || currentUser.role === "Leader Developer") {
-                document.getElementById('admin-nav').style.display = 'flex';
-                document.getElementById('btn-chat-announcement').style.display = 'flex';
-            }
-            logToDiscord(currentUser.name, currentUser.role);
-            updateOnline(); loadOnline(); loadData();
-            setInterval(updateOnline, 30000); setInterval(loadOnline, 10000);
-            
+            await _supabase.from('profiles').upsert({ id: currentUser.id, username: currentUser.name, avatar_url: currentUser.avatar, last_seen: new Date().toISOString() });
+            loadData();
             const { data: chats } = await _supabase.from('messages').select('*').order('created_at', {ascending: true}).limit(50);
             if(chats) chats.forEach(m => displayMessage(m));
         }
