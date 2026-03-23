@@ -119,3 +119,52 @@ if (logoutBtn) {
 if (window.location.pathname.includes('dashboard.html')) {
     checkAuth();
 }
+
+// ... (mantenha o início do script anterior com as chaves do Supabase)
+
+// Alternar Abas (Navegação)
+function switchTab(tabId) {
+    document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    
+    document.getElementById(tabId).classList.add('active');
+    event.currentTarget.classList.add('active');
+}
+
+// Salvar Investimento Real
+async function addInvestment() {
+    const name = document.getElementById('inv-name').value;
+    const value = document.getElementById('inv-value').value;
+
+    const { error } = await _supabase.from('investments').insert([{ name, value, date: new Date() }]);
+    
+    if (error) alert("Erro ao salvar");
+    else {
+        alert("Salvo com sucesso!");
+        loadInvestments();
+    }
+}
+
+// Carregar Dados Reais do Banco
+async function loadInvestments() {
+    const { data } = await _supabase.from('investments').select('*');
+    const list = document.getElementById('list-inv');
+    let total = 0;
+
+    list.innerHTML = data.map(i => {
+        total += parseFloat(i.value);
+        return `<tr><td>${i.name}</td><td>R$ ${i.value}</td><td>${new Date(i.date).toLocaleDateString()}</td></tr>`;
+    }).join('');
+
+    document.getElementById('total-val').innerText = `R$ ${total.toLocaleString()}`;
+}
+
+// Chamar ao carregar o dashboard
+async function checkAuth() {
+    // ... (mantenha a lógica de verificação de cargo do Discord que fizemos)
+    
+    // Se passar na verificação:
+    loadInvestments();
+    loadUpdates();
+    document.getElementById('user-role-display').innerText = "Desenvolvedor";
+}
