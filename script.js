@@ -1,5 +1,5 @@
 const SUPABASE_URL = "https://ltgxlyrvzonudpkffepv.supabase.co";
-const SUPABASE_KEY = "SUA_KEY";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx0Z3hseXJ2em9udWRwa2ZmZXB2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMTIxMDksImV4cCI6MjA4OTc4ODEwOX0.KsgdcMA8u5j9TBh0pqk9k4rXLXIjX5h38VTR8DZ2DLs";
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const GUILD_ID = "1457130952655503536";
