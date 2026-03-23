@@ -7,129 +7,36 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        
-        body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background: #050505;
-            overflow: hidden;
-            perspective: 1000px;
-        }
-
-        .bg-particles {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            z-index: -1;
-            background: radial-gradient(circle at center, #0a0a15 0%, #050505 100%);
-        }
-
-        .particle {
-            position: absolute;
-            background: var(--accent);
-            border-radius: 50%;
-            opacity: 0.3;
-            filter: blur(2px);
-            animation: float 20s infinite linear;
-        }
-
-        @keyframes float {
-            0% { transform: translateY(100vh) scale(0); opacity: 0; }
-            50% { opacity: 0.5; }
-            100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
-        }
-
-        .login-card {
-            background: rgba(15, 15, 20, 0.8);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 40px;
-            border-radius: 24px;
-            text-align: center;
-            width: 380px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-            animation: cardEntrance 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-
-        @keyframes cardEntrance {
-            from { opacity: 0; transform: scale(0.9) translateY(30px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-
-        .discord-btn {
-            background: #5865F2;
-            color: white;
-            border: none;
-            padding: 16px;
-            border-radius: 14px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            transition: all 0.3s;
-            margin-top: 20px;
-        }
-
-        .discord-btn:hover {
-            background: #4752c4;
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(88, 101, 242, 0.3);
-        }
-
-        .discord-btn:active { transform: translateY(-1px); }
-
-        .logo-text {
-            font-size: 28px;
-            font-weight: 900;
-            letter-spacing: 2px;
-            color: var(--accent);
-            margin-bottom: 5px;
-            text-shadow: 0 0 15px rgba(0, 178, 255, 0.4);
-        }
+        body { margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; background: #050505; overflow: hidden; font-family: 'Outfit', sans-serif; }
+        .bg-animate { position: absolute; width: 100%; height: 100%; z-index: -1; background: radial-gradient(circle at center, #0a0a1a 0%, #000 100%); }
+        .star { position: absolute; background: #00b2ff; border-radius: 50%; opacity: 0.3; filter: blur(1px); animation: move 15s infinite linear; }
+        @keyframes move { from { transform: translateY(100vh) scale(0); opacity: 0; } 50% { opacity: 0.6; } to { transform: translateY(-10vh) scale(1.2); opacity: 0; } }
+        .login-card { background: rgba(10, 10, 15, 0.8); backdrop-filter: blur(25px); border: 1px solid rgba(0, 178, 255, 0.1); padding: 50px; border-radius: 30px; text-align: center; width: 400px; box-shadow: 0 0 50px rgba(0, 0, 0, 0.8); animation: slideUp 0.8s ease; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+        .logo-main { font-size: 32px; font-weight: 900; color: #00b2ff; letter-spacing: 3px; text-shadow: 0 0 20px rgba(0, 178, 255, 0.5); margin-bottom: 10px; }
+        .discord-btn { background: #5865F2; color: white; border: none; padding: 18px; border-radius: 15px; font-size: 16px; font-weight: 700; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 12px; transition: 0.4s; margin-top: 30px; }
+        .discord-btn:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(88, 101, 242, 0.4); background: #4752c4; }
     </style>
 </head>
 <body>
-
-    <div class="bg-particles" id="particles"></div>
-
+    <div class="bg-animate" id="stars"></div>
     <div class="login-card">
-        <div class="logo-text">WIND ROSE</div>
-        <p style="color: #666; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Studio Dev Panel</p>
-        
-        <button id="login-btn" class="discord-btn">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037 19.736 19.736 0 0 0-4.885 1.515.069.069 0 0 0-.032.027C.533 9.048-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.06.06 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
-            Entrar com Discord
-        </button>
-
-        <p id="error-msg" style="color: #ff4b4b; margin-top: 15px; font-size: 13px; display: none; font-weight: 600;">Acesso negado.</p>
+        <div class="logo-main">WIND ROSE</div>
+        <p style="color: #555; font-size: 12px; letter-spacing: 2px;">DEVELOPER INTERFACE</p>
+        <button id="login-btn" class="discord-btn">Entrar com Discord</button>
     </div>
-
     <script>
-        // Gerador de partículas animadas via JS para ficar mais "bonito"
-        const container = document.getElementById('particles');
-        for (let i = 0; i < 30; i++) {
-            const p = document.createElement('div');
-            p.className = 'particle';
-            const size = Math.random() * 5 + 2 + 'px';
-            p.style.width = size;
-            p.style.height = size;
-            p.style.left = Math.random() * 100 + 'vw';
-            p.style.animationDelay = Math.random() * 20 + 's';
-            p.style.animationDuration = (Math.random() * 10 + 10) + 's';
-            container.appendChild(p);
+        const stars = document.getElementById('stars');
+        for (let i = 0; i < 40; i++) {
+            const s = document.createElement('div');
+            s.className = 'star';
+            const size = Math.random() * 4 + 2 + 'px';
+            s.style.width = size; s.style.height = size;
+            s.style.left = Math.random() * 100 + 'vw';
+            s.style.animationDelay = Math.random() * 15 + 's';
+            stars.appendChild(s);
         }
     </script>
-    
     <script src="script.js"></script>
 </body>
 </html>
