@@ -53,10 +53,7 @@
                     <button class="btn" onclick="addRobux()">Salvar</button>
                 </div>
                 <div class="card">
-                    <table style="width:100%;">
-                        <thead><tr style="text-align:left; opacity:0.5;"><th>Fonte</th><th>Quantia</th><th>Data</th></tr></thead>
-                        <tbody id="table-body"></tbody>
-                    </table>
+                    <table><thead><tr style="text-align:left; opacity:0.5;"><th>Fonte</th><th>Quantia</th><th>Data</th></tr></thead><tbody id="table-body"></tbody></table>
                 </div>
             </section>
 
@@ -75,7 +72,7 @@
                     <div style="display:flex; flex-direction:column;">
                         <div id="chat-box" class="card chat-scroll" style="height:60vh;"></div>
                         <div style="display:flex; gap:10px; margin-top:15px;">
-                            <input type="text" id="chat-input" placeholder="Mensagem..." style="margin:0;">
+                            <input type="text" id="chat-input" placeholder="Mensagem...">
                             <button class="btn" onclick="sendMessage()" style="width:60px; margin:0;"><i data-lucide="send"></i></button>
                         </div>
                     </div>
@@ -98,10 +95,7 @@
             <div id="p-banner-ui" class="p-banner"></div>
             <div class="p-avatar-wrap">
                 <img id="p-avatar-ui" src="">
-                <div>
-                    <h2 id="p-name-ui">...</h2>
-                    <span id="p-role-ui" class="role-badge">...</span>
-                </div>
+                <div><h2 id="p-name-ui">...</h2><span id="p-role-ui" class="role-badge">...</span></div>
             </div>
             <div class="p-info">
                 <div id="p-view-mode">
