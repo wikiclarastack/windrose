@@ -1,24 +1,14 @@
-// script.js
 const SUPABASE_URL = "https://ltgxlyrvzonudpkffepv.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx0Z3hseXJ2em9udWRwa2ZmZXB2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMTIxMDksImV4cCI6MjA4OTc4ODEwOX0.KsgdcMA8u5j9TBh0pqk9k4rXLXIjX5h38VTR8DZ2DLs";
-
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// 1. LOGIN DISCORD
-const loginBtn = document.getElementById('login-btn');
-if (loginBtn) {
-    loginBtn.onclick = async () => {
-        await _supabase.auth.signInWithOAuth({
-            provider: 'discord',
-            options: {
-                scopes: 'identify guilds guilds.members.read',
-                redirectTo: 'https://devwindrosestudios.vercel.app/dashboard.html'
-            }
-        });
-    };
-}
+// IDs DE PERMISSÃO
+const OWNER_ID = "1419845373534670848";
+const LEADER_DEV_ID = "1078454283038642226";
 
-// 2. NAVEGAÇÃO ENTRE ABAS
+let currentUser = null;
+
+// --- NAVEGAÇÃO ---
 function switchTab(tabId, el) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
@@ -26,44 +16,62 @@ function switchTab(tabId, el) {
     el.classList.add('active');
 }
 
-// 3. CARREGAR DADOS DO SUPABASE
-async function loadData() {
-    const { data: invs } = await _supabase.from('investments').select('*').order('date', {ascending: false});
-    const { data: updates } = await _supabase.from('updates').select('*').order('date', {ascending: false});
+// --- CONTROLE DE ACESSO ---
+function checkIsAdmin(id) {
+    return id === OWNER_ID || id === LEADER_DEV_ID;
+}
 
-    // Renderizar Investimentos
-    if (invs) {
-        let total = 0;
-        document.getElementById('table-body').innerHTML = invs.map(i => {
-            total += parseInt(i.value || 0);
-            return `<tr><td>${i.name}</td><td style="color:#00b2ff">R$ ${i.value}</td><td>${new Date(i.date).toLocaleDateString()}</td></tr>`;
-        }).join('');
-        document.getElementById('total-robux').innerText = total.toLocaleString();
-    }
+// --- CHAT E MENSAGENS ---
+async function sendMessage(isAnnouncement = false) {
+    const input = document.getElementById('chat-input');
+    if(!input.value) return;
 
-    // Renderizar Patches
-    if (updates) {
-        if(updates.length > 0) document.getElementById('current-v').innerText = updates[0].title;
-        document.getElementById('patches-container').innerHTML = updates.map(u => `
-            <div class="card" style="margin-bottom:15px;">
-                <h3 style="color:#00b2ff">${u.title}</h3>
-                <p style="margin-top:10px; color:#888;">${u.description}</p>
+    await _supabase.from('messages').insert([{
+        user_id: currentUser.id,
+        username: currentUser.name,
+        avatar_url: currentUser.avatar,
+        content: input.value,
+        is_announcement: isAnnouncement
+    }]);
+    input.value = "";
+}
+
+function displayMessage(msg) {
+    const box = document.getElementById('chat-box');
+    const isAdm = checkIsAdmin(msg.user_id);
+    const isAnnounce = msg.is_announcement ? "border:1px solid #f59e0b; background:rgba(245,158,11,0.05)" : "";
+    
+    const html = `
+        <div class="animate" style="display:flex; gap:12px; padding:12px; border-radius:12px; background:rgba(255,255,255,0.02); ${isAnnounce}">
+            <img src="${msg.avatar_url}" style="width:40px; height:40px; border-radius:10px; border:2px solid ${isAdm ? 'var(--accent)' : '#222'}">
+            <div style="flex:1">
+                <div style="display:flex; justify-content:space-between;">
+                    <strong style="color:${isAdm ? 'var(--accent)' : '#fff'}; font-size:13px;">${msg.username} ${isAdm ? '⭐' : ''}</strong>
+                    ${checkIsAdmin(currentUser.id) ? `<span onclick="deleteMsg('${msg.id}')" style="color:#ff4b4b; cursor:pointer; font-size:18px;">&times;</span>` : ''}
+                </div>
+                <p style="font-size:14px; margin-top:4px; line-height:1.4;">${msg.content}</p>
             </div>
-        `).join('');
+        </div>
+    `;
+    box.innerHTML += html;
+    box.scrollTop = box.scrollHeight;
+}
+
+async function deleteMsg(id) {
+    if(confirm("Deseja apagar esta mensagem?")) {
+        await _supabase.from('messages').delete().eq('id', id);
+        location.reload();
     }
 }
 
-// 4. FUNÇÕES DE ADIÇÃO
+// --- GESTÃO DE DADOS ---
 async function addRobux() {
     const name = document.getElementById('inv-name').value;
     const value = document.getElementById('inv-amt').value;
     if(!name || !value) return alert("Preencha os campos!");
 
-    const { error } = await _supabase.from('investments').insert([{ name, value, date: new Date() }]);
-    if(!error) { 
-        alert("Sucesso!");
-        location.reload(); 
-    }
+    await _supabase.from('investments').insert([{ name, value, date: new Date() }]);
+    location.reload();
 }
 
 async function addPatch() {
@@ -71,26 +79,75 @@ async function addPatch() {
     const description = document.getElementById('p-desc').value;
     if(!title || !description) return alert("Preencha os campos!");
 
-    const { error } = await _supabase.from('updates').insert([{ title, description, date: new Date() }]);
-    if(!error) { 
-        alert("Publicado!");
-        location.reload(); 
+    await _supabase.from('updates').insert([{ title, description, date: new Date() }]);
+    location.reload();
+}
+
+async function createDashAlert() {
+    const content = document.getElementById('dash-alert-input').value;
+    await _supabase.from('dashboard_alerts').insert([{
+        content,
+        author: currentUser.name
+    }]);
+    alert("Alerta Global Enviado!");
+    location.reload();
+}
+
+// --- CARREGAMENTO INICIAL ---
+async function loadAll() {
+    // Carregar Investimentos
+    const { data: invs } = await _supabase.from('investments').select('*').order('date', {ascending: false});
+    if(invs) {
+        let total = 0;
+        document.getElementById('table-body').innerHTML = invs.map(i => {
+            total += parseInt(i.value);
+            return `<tr><td>${i.name}</td><td style="color:var(--accent)">R$ ${parseInt(i.value).toLocaleString()}</td><td>${new Date(i.date).toLocaleDateString()}</td></tr>`;
+        }).join('');
+        document.getElementById('total-robux').innerText = total.toLocaleString();
+    }
+
+    // Carregar Chat
+    const { data: chats } = await _supabase.from('messages').select('*').order('created_at', {ascending: true}).limit(50);
+    if(chats) chats.forEach(m => displayMessage(m));
+
+    // Carregar Avisos
+    const { data: alerts } = await _supabase.from('dashboard_alerts').select('*').order('created_at', {ascending: false}).limit(1);
+    if(alerts && alerts.length > 0) {
+        document.getElementById('top-alert-banner').style.display = 'block';
+        document.getElementById('alert-text').innerText = alerts[0].content;
+        document.getElementById('alert-author').innerText = "Publicado por: " + alerts[0].author;
     }
 }
 
-// 5. LOGOUT E SESSÃO
-document.getElementById('logout-btn')?.addEventListener('click', async () => {
+// Realtime para Chat
+_supabase.channel('room1').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+    displayMessage(payload.new);
+}).subscribe();
+
+// Autenticação
+window.onload = async () => {
+    const { data: { session } } = await _supabase.auth.getSession();
+    if(!session && window.location.pathname.includes('dashboard')) {
+        window.location.href = 'index.html';
+    } else if(session) {
+        const meta = session.user.user_metadata;
+        currentUser = {
+            id: meta.provider_id,
+            name: meta.full_name,
+            avatar: meta.avatar_url
+        };
+        
+        document.getElementById('user-display-name').innerText = currentUser.name.split(' ')[0];
+        
+        if(checkIsAdmin(currentUser.id)) {
+            document.getElementById('admin-nav').style.display = 'flex';
+            document.getElementById('btn-chat-announcement').style.display = 'block';
+        }
+        loadAll();
+    }
+};
+
+document.getElementById('logout-btn').onclick = async () => {
     await _supabase.auth.signOut();
     window.location.href = 'index.html';
-});
-
-// AUTO-EXECUTA NO DASHBOARD
-if (window.location.pathname.includes('dashboard.html')) {
-    _supabase.auth.getSession().then(({data}) => {
-        if(!data.session) window.location.href = 'index.html';
-        else {
-            document.getElementById('user-name').innerText = data.session.user.user_metadata.full_name.split(' ')[0];
-            loadData();
-        }
-    });
-}
+};
