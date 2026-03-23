@@ -1,10 +1,13 @@
-// Configuração do Supabase com as suas credenciais
+// Configurações do Wind Rose Studios
 const SUPABASE_URL = "https://ltgxlyrvzonudpkffepv.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx0Z3hseXJ2em9udWRwa2ZmZXB2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMTIxMDksImV4cCI6MjA4OTc4ODEwOX0.KsgdcMA8u5j9TBh0pqk9k4rXLXIjX5h38VTR8DZ2DLs";
 
+const SERVER_ID = "1455264719714783254"; // ID do Servidor
+const ROLE_ID = "1455265266006102220";   // ID do Cargo de Dev
+
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// --- LÓGICA DE LOGIN (INDEX.HTML) ---
+// --- 1. LÓGICA DE LOGIN (PÁGINA INICIAL) ---
 const loginBtn = document.getElementById('login-btn');
 
 if (loginBtn) {
@@ -12,96 +15,98 @@ if (loginBtn) {
         const { error } = await _supabase.auth.signInWithOAuth({
             provider: 'discord',
             options: {
-                // Redireciona para o dashboard após o login
+                // Solicita permissão para ver servidores e membros
+                scopes: 'identify guilds guilds.members.read',
                 redirectTo: 'https://devwindrosestudios.vercel.app/dashboard.html'
             }
         });
-        if (error) console.error("Erro ao logar:", error.message);
+        if (error) alert("Erro no login: " + error.message);
     });
 }
 
-// --- LÓGICA DO DASHBOARD (DASHBOARD.HTML) ---
-async function checkAuth() {
-    // 1. Verifica se existe uma sessão ativa
-    const { data: { session }, error: sessionError } = await _supabase.auth.getSession();
+// --- 2. VERIFICAÇÃO DE CARGO NO DISCORD ---
+async function validarAcessoPeloDiscord(session) {
+    const accessToken = session.provider_token;
 
-    if (sessionError || !session) {
-        // Se não estiver logado, volta para a home
+    try {
+        // Consulta se o usuário é membro do servidor específico
+        const response = await fetch(`https://discord.com/api/users/@me/guilds/${SERVER_ID}/member`, {
+            headers: { Authorization: `Bearer ${accessToken}` }
+        });
+
+        if (!response.ok) {
+            console.error("Usuário não está no servidor ou erro na API");
+            return false;
+        }
+
+        const member = await response.json();
+        
+        // Verifica se o ID do cargo solicitado está na lista de cargos do usuário
+        return member.roles.includes(ROLE_ID);
+    } catch (err) {
+        console.error("Erro ao validar cargo:", err);
+        return false;
+    }
+}
+
+// --- 3. CONTROLE DE ACESSO DO DASHBOARD ---
+async function checkAuth() {
+    const { data: { session } } = await _supabase.auth.getSession();
+
+    // Se não houver sessão, volta pro login
+    if (!session) {
         window.location.href = 'index.html';
         return;
     }
 
-    // 2. Pegar os dados do desenvolvedor na tabela 'developers'
-    // Importante: O discord_id no Supabase Auth fica em session.user.user_metadata.provider_id
-    const discordId = session.user.user_metadata.provider_id;
+    // Valida o cargo em tempo real no Discord
+    const autorizado = await validarAcessoPeloDiscord(session);
 
-    const { data: devData, error: devError } = await _supabase
-        .from('developers')
-        .select('*')
-        .eq('discord_id', discordId)
-        .single();
-
-    // 3. Bloqueio de Segurança: Se logou com Discord mas não está na tabela de devs
-    if (devError || !devData) {
-        alert("Acesso Negado: Você não está na lista de desenvolvedores autorizados.");
+    if (!autorizado) {
+        alert("ACESSO NEGADO: Você precisa ter o cargo de desenvolvedor no servidor oficial.");
         await _supabase.auth.signOut();
-        window.location.href = 'index.html?error=unauthorized';
+        window.location.href = 'index.html?error=sem_cargo';
         return;
     }
 
-    // 4. Se chegou aqui, está autorizado! Vamos preencher a UI
-    renderUserProfile(session.user.user_metadata, devData.role);
-    loadInvestments();
-    loadUpdates();
+    // Se autorizado, carrega a interface
+    console.log("Acesso autorizado para:", session.user.user_metadata.full_name);
+    renderDashboard(session.user.user_metadata);
 }
 
-function renderUserProfile(metadata, role) {
-    const nameElement = document.getElementById('user-name');
-    const avatarElement = document.getElementById('user-avatar');
+// --- 4. RENDERIZAÇÃO DA INTERFACE ---
+function renderDashboard(user) {
+    const nameEl = document.getElementById('user-name');
+    const avatarEl = document.getElementById('user-avatar');
 
-    if (nameElement) nameElement.innerText = metadata.full_name || metadata.name;
-    if (avatarElement) avatarElement.src = metadata.avatar_url;
-    
-    // Opcional: Mostrar o cargo (role) que veio da tabela do banco
-    console.log("Logado como:", role);
+    if (nameEl) nameEl.innerText = user.full_name || user.name;
+    if (avatarEl) avatarEl.src = user.avatar_url;
+
+    // Carregar dados adicionais do banco (Investimentos e Patch Notes)
+    loadData();
 }
 
-// --- BUSCAR DADOS DO BANCO ---
-
-async function loadInvestments() {
-    const { data, error } = await _supabase
-        .from('investments')
-        .select('*')
-        .order('date', { ascending: false });
-
-    if (!error && data) {
-        // Aqui você pode criar uma função para injetar os dados no HTML da tabela
-        console.log("Investimentos carregados:", data);
-    }
-}
-
-async function loadUpdates() {
-    const { data, error } = await _supabase
+async function loadData() {
+    // Exemplo de busca de atualizações
+    const { data: updates } = await _supabase
         .from('updates')
         .select('*')
         .order('date', { ascending: false });
 
-    if (!error && data) {
-        const list = document.getElementById('updates-list');
-        if (list) {
-            list.innerHTML = data.map(update => `
-                <tr>
-                    <td>${update.title}</td>
-                    <td>${new Date(update.date).toLocaleDateString()}</td>
-                    <td>Dev</td>
-                    <td><span class="status-badge">Ativo</span></td>
-                </tr>
-            `).join('');
-        }
+    const list = document.getElementById('updates-list');
+    if (list && updates) {
+        list.innerHTML = updates.map(up => `
+            <tr>
+                <td>${up.title}</td>
+                <td>${new Date(up.date).toLocaleDateString()}</td>
+                <td>${up.developer || 'Equipe'}</td>
+                <td><span class="status-badge">Live</span></td>
+            </tr>
+        `).join('');
     }
 }
 
-// --- BOTÃO DE SAIR ---
+// --- 5. LOGOUT ---
 const logoutBtn = document.getElementById('logout-btn');
 if (logoutBtn) {
     logoutBtn.addEventListener('click', async () => {
@@ -110,7 +115,7 @@ if (logoutBtn) {
     });
 }
 
-// Inicializar apenas se estivermos no Dashboard
+// Executa a verificação se estiver na página do Dashboard
 if (window.location.pathname.includes('dashboard.html')) {
     checkAuth();
 }
