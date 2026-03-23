@@ -3,23 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wind Rose Studios | Entrar</title>
+    <title>Wind Rose Studios | Login</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://unpkg.com/lucide-static/font/lucide.css" rel="stylesheet">
 </head>
-<body class="login-page">
-    <div class="glass-card animate-pop">
-        <div class="logo-section">
-            <i class="lc-gamepad-2"></i>
-            <h1>Wind Rose <span>Studios</span></h1>
-        </div>
-        <p>Painel de Gestão de Desenvolvedores</p>
-        <button id="login-btn" class="btn-discord">
-            <i class="lc-disc"></i> Entrar com Discord
+<body style="display: flex; align-items: center; justify-content: center; height: 100vh; background: #050505;">
+    
+    <div class="card" style="text-align: center; max-width: 400px; width: 90%; border: 1px solid #222;">
+        <h1 style="color: #00b2ff; font-weight: 800; margin-bottom: 10px;">WIND ROSE</h1>
+        <p style="color: #888; margin-bottom: 30px;">Painel Interno de Desenvolvedores</p>
+        
+        <button id="login-btn" class="btn" style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+            Entrar com Discord
         </button>
-        <div id="error-msg" class="error-badge" style="display: none;">Acesso negado: Apenas para a equipe.</div>
+        
+        <p id="msg-erro" style="color: #ff4b4b; margin-top: 15px; font-size: 14px; display: none;">
+            Acesso negado. Verifique seu cargo no Discord.
+        </p>
     </div>
+
     <script src="script.js"></script>
 </body>
 </html>
