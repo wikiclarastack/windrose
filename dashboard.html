@@ -2,13 +2,12 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Wind Rose | Master Panel</title>
+    <title>Wind Rose | Dashboard</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="dashboard-body">
-    <div class="bg-canvas"><div class="glow-orb"></div></div>
     <div id="notification-host"></div>
     <audio id="mention-sound" src="https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3"></audio>
 
@@ -17,47 +16,45 @@
             <div class="logo">WIND ROSE</div>
             <nav>
                 <div class="nav-link active" onclick="switchTab('home', this)"><i data-lucide="home"></i> Dashboard</div>
-                <div class="nav-link" onclick="switchTab('invest', this)"><i data-lucide="banknote"></i> Financeiro</div>
+                <div class="nav-link" onclick="switchTab('invest', this)"><i data-lucide="banknote"></i> Robux</div>
                 <div class="nav-link" onclick="switchTab('patch', this)"><i data-lucide="terminal"></i> Patch Notes</div>
-                <div class="nav-link" onclick="switchTab('chat', this)"><i data-lucide="messages-square"></i> Chat Central</div>
-                <div id="admin-nav" class="nav-link" style="display:none;" onclick="switchTab('admin', this)"><i data-lucide="crown"></i> Master Admin</div>
+                <div class="nav-link" onclick="switchTab('chat', this)"><i data-lucide="messages-square"></i> Chat</div>
+                <div id="admin-nav" class="nav-link" style="display:none;" onclick="switchTab('admin', this)"><i data-lucide="crown"></i> Admin</div>
             </nav>
 
-            <div class="user-side" onclick="openMyProfile()">
+            <div class="user-side" id="my-profile-trigger">
                 <img id="user-avatar-side" src="" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
                 <div>
-                    <p id="user-name-side" style="font-weight:700; font-size:14px;">Carregando...</p>
+                    <p id="user-name-side" style="font-weight:700; font-size:14px;">...</p>
                     <span id="user-role-tag" class="role-badge">Visitante</span>
                 </div>
             </div>
-            <button id="logout-btn" class="nav-link" style="color:#ff4b4b; border:none; background:none; margin-top:10px;"><i data-lucide="log-out"></i> Sair</button>
+            <button id="logout-btn" class="logout-style"><i data-lucide="log-out"></i> Sair</button>
         </aside>
 
         <main class="main-content">
             <section id="home" class="view active">
-                <h1 style="font-size:32px; margin-bottom:20px;">Visão Geral do Estúdio</h1>
                 <div class="grid">
-                    <div class="card"><p style="color:var(--text-dim)">Balanço Atual</p><div class="val">R$ <span id="total-robux">0</span></div></div>
-                    <div class="card"><p style="color:var(--text-dim)">Versão do Jogo</p><div class="val" id="current-version" style="color:#fff">v0.0.0</div></div>
-                    <div class="card"><p style="color:var(--text-dim)">Devs Online</p><div class="val" id="online-count-main" style="color:var(--success)">0</div></div>
+                    <div class="card"><p>Balanço</p><div class="val">R$ <span id="total-robux">0</span></div></div>
+                    <div class="card"><p>Versão</p><div class="val" id="current-version" style="color:#fff">v0.0</div></div>
+                    <div class="card"><p>Online</p><div class="val" id="online-count-main" style="color:#00ff88">0</div></div>
                 </div>
-                <div id="top-alert-banner" class="card" style="margin-top:25px; display:none; border-left:6px solid var(--accent);">
-                    <h4 style="color:var(--accent)">AVISO IMPORTANTE</h4>
-                    <p id="alert-text" style="margin:10px 0; font-size:18px;"></p>
+                <div id="top-alert-banner" class="card" style="margin-top:25px; display:none; border-left:4px solid #00b2ff;">
+                    <p id="alert-text" style="font-weight:600;"></p>
                     <small id="alert-author" style="opacity:0.5"></small>
                 </div>
             </section>
 
             <section id="invest" class="view">
-                <h1>Gestão de Robux</h1>
-                <div class="card" style="max-width:450px; margin:25px 0;">
-                    <input type="text" id="inv-name" placeholder="Motivo da Entrada">
-                    <input type="number" id="inv-amt" placeholder="Valor em Robux">
-                    <button class="btn" onclick="addRobux()">Registrar</button>
+                <h1>Finanças</h1>
+                <div class="card" style="max-width:400px; margin:20px 0;">
+                    <input type="text" id="inv-name" placeholder="Fonte">
+                    <input type="number" id="inv-amt" placeholder="Robux">
+                    <button class="btn" onclick="addRobux()">Salvar</button>
                 </div>
                 <div class="card">
-                    <table style="width:100%; border-collapse:collapse;">
-                        <thead><tr style="text-align:left; color:var(--text-dim)"><th>Fonte</th><th>Quantia</th><th>Data</th></tr></thead>
+                    <table style="width:100%;">
+                        <thead><tr style="text-align:left; opacity:0.5;"><th>Fonte</th><th>Quantia</th><th>Data</th></tr></thead>
                         <tbody id="table-body"></tbody>
                     </table>
                 </div>
@@ -65,60 +62,63 @@
 
             <section id="patch" class="view">
                 <h1>Patch Notes</h1>
-                <div class="card" style="margin:25px 0;">
-                    <input type="text" id="p-title" placeholder="Versão (Ex: v1.5)">
-                    <textarea id="p-desc" rows="4" placeholder="Descreva as atualizações..."></textarea>
-                    <button class="btn" onclick="addPatch()">Publicar Notas</button>
+                <div class="card" style="margin:20px 0;">
+                    <input type="text" id="p-title" placeholder="Versão">
+                    <textarea id="p-desc" rows="3" placeholder="Mudanças..."></textarea>
+                    <button class="btn" onclick="addPatch()">Publicar</button>
                 </div>
                 <div id="patches-container"></div>
             </section>
 
             <section id="chat" class="view">
                 <div class="chat-wrapper">
-                    <div class="chat-main" style="display:flex; flex-direction:column;">
-                        <div id="chat-box" class="card chat-scroll"></div>
-                        <div class="chat-input-area" style="display:flex; gap:10px; margin-top:15px;">
-                            <input type="text" id="chat-input" placeholder="Conversar com a equipe..." style="margin:0;">
-                            <button class="btn" onclick="sendMessage()" style="width:80px; margin:0;"><i data-lucide="send"></i></button>
-                            <button id="btn-chat-announcement" class="btn" onclick="sendMessage(true)" style="width:80px; margin:0; background:#f59e0b; display:none;"><i data-lucide="alert-triangle"></i></button>
+                    <div style="display:flex; flex-direction:column;">
+                        <div id="chat-box" class="card chat-scroll" style="height:60vh;"></div>
+                        <div style="display:flex; gap:10px; margin-top:15px;">
+                            <input type="text" id="chat-input" placeholder="Mensagem..." style="margin:0;">
+                            <button class="btn" onclick="sendMessage()" style="width:60px; margin:0;"><i data-lucide="send"></i></button>
                         </div>
                     </div>
                     <div class="online-box">
-                        <h4 style="margin-bottom:15px; font-size:12px; color:var(--accent);">ONLINE (<span id="online-count">0</span>)</h4>
+                        <h4 style="font-size:10px; color:#00b2ff; margin-bottom:15px;">ONLINE (<span id="online-count">0</span>)</h4>
                         <div id="user-list"></div>
                     </div>
                 </div>
             </section>
 
             <section id="admin" class="view">
-                <h1>Master Admin</h1>
-                <div class="card" style="margin-top:25px;">
-                    <h3>Publicar Alerta Global</h3>
-                    <textarea id="dash-alert-input" placeholder="Mensagem para toda a equipe..."></textarea>
-                    <button class="btn" onclick="createDashAlert()">Postar Alerta</button>
-                </div>
+                <h1>Admin</h1>
+                <div class="card"><textarea id="dash-alert-input" placeholder="Alerta global..."></textarea><button class="btn" onclick="createDashAlert()">Postar Alerta</button></div>
             </section>
         </main>
     </div>
 
-    <div id="profile-modal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:10000; align-items:center; justify-content:center; backdrop-filter:blur(10px);">
-        <div class="card" style="width:450px; padding:0; overflow:hidden;">
-            <div id="p-banner" style="height:120px; background:linear-gradient(45deg, #00b2ff, #001f33);"></div>
-            <div style="padding:0 30px 30px;">
-                <img id="p-img" src="" style="width:100px; height:100px; border-radius:25px; border:6px solid #111; margin-top:-50px; margin-bottom:15px;">
-                <h2 id="p-name">...</h2>
-                <div id="p-role-badge" class="role-badge" style="margin-bottom:20px;">...</div>
-                <h5 style="color:var(--accent); font-size:10px; text-transform:uppercase;">Bio</h5>
-                <p id="p-bio" style="margin-bottom:15px; opacity:0.8;"></p>
-                <h5 style="color:var(--accent); font-size:10px; text-transform:uppercase;">Especialidades</h5>
-                <p id="p-spec" style="opacity:0.8;"></p>
-                
-                <div id="edit-area" style="display:none; margin-top:20px; border-top:1px solid var(--border); padding-top:20px;">
-                    <textarea id="edit-bio" placeholder="Sua bio..."></textarea>
-                    <input type="text" id="edit-spec" placeholder="Suas especialidades...">
-                    <button class="btn" onclick="saveProfile()">Salvar Perfil</button>
+    <div id="profile-modal" class="modal">
+        <div class="modal-card">
+            <div id="p-banner-ui" class="p-banner"></div>
+            <div class="p-avatar-wrap">
+                <img id="p-avatar-ui" src="">
+                <div>
+                    <h2 id="p-name-ui">...</h2>
+                    <span id="p-role-ui" class="role-badge">...</span>
                 </div>
-                <button class="btn" onclick="closeProfile()" style="margin-top:15px; background:#333;">Fechar</button>
+            </div>
+            <div class="p-info">
+                <div id="p-view-mode">
+                    <p id="p-bio-ui" style="opacity:0.7; margin-bottom:15px;"></p>
+                    <small style="color:#00b2ff">ESPECIALIDADES</small>
+                    <p id="p-spec-ui" style="margin-bottom:20px;"></p>
+                    <button class="btn" id="edit-profile-btn" style="display:none;" onclick="toggleEditProfile(true)">Editar Perfil</button>
+                </div>
+                <div id="p-edit-mode" style="display:none;">
+                    <input type="text" id="edit-avatar" placeholder="Link da Foto">
+                    <input type="text" id="edit-banner" placeholder="Link do Banner">
+                    <textarea id="edit-bio" placeholder="Bio..."></textarea>
+                    <input type="text" id="edit-spec" placeholder="Especialidades...">
+                    <button class="btn" onclick="saveProfileData()">Salvar</button>
+                    <button class="btn" style="background:#222; margin-top:5px;" onclick="toggleEditProfile(false)">Cancelar</button>
+                </div>
+                <button class="btn" style="background:none; border:1px solid #333; margin-top:10px;" onclick="closeProfile()">Fechar</button>
             </div>
         </div>
     </div>
