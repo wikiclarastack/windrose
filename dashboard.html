@@ -1,74 +1,46 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wind Rose | Dashboard</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://unpkg.com/lucide-static/font/lucide.css" rel="stylesheet">
-</head>
 <body class="dashboard-body">
     <aside class="sidebar">
-        <div class="sidebar-header">
-            <h2>Wind Rose</h2>
-        </div>
-        <nav class="menu">
-            <a href="#" class="active"><i class="lc-layout-dashboard"></i> Dashboard</a>
-            <a href="#"><i class="lc-trending-up"></i> Investimentos</a>
-            <a href="#"><i class="lc-code"></i> Patch Notes</a>
-            <a href="#"><i class="lc-users"></i> Equipe</a>
-            <a href="#"><i class="lc-settings"></i> Admin</a>
-        </nav>
-        <button id="logout-btn" class="logout"><i class="lc-log-out"></i> Sair</button>
+        <div class="logo-hub">WIND ROSE</div>
+        <ul class="nav-menu">
+            <li class="nav-item active" onclick="switchTab('overview')"><i class="lc-layout-dashboard"></i> Dashboard</li>
+            <li class="nav-item" onclick="switchTab('investments')"><i class="lc-dollar-sign"></i> Investimentos</li>
+            <li class="nav-item" onclick="switchTab('updates')"><i class="lc-zap"></i> Patch Notes</li>
+        </ul>
+        <button id="logout-btn" class="nav-item" style="color: #ff4b4b; margin-top: auto; border:none; background:none; width:100%"><i class="lc-log-out"></i> Sair</button>
     </aside>
 
-    <main class="content">
-        <header class="top-bar">
-            <h1>Visão Geral do Estúdio</h1>
-            <div class="user-profile">
-                <span id="user-name">Carregando...</span>
-                <img id="user-avatar" src="https://via.placeholder.com/40" alt="Avatar">
-            </div>
-        </header>
-
-        <section class="stats-grid">
-            <div class="stat-card animate-up">
-                <h3>Investimento Total</h3>
-                <p class="value">R$ 145.200</p>
-                <span class="trend pos">+12%</span>
-            </div>
-            <div class="stat-card animate-up" style="animation-delay: 0.1s;">
-                <h3>Versão Atual</h3>
-                <p class="value">v1.0.4-beta</p>
-                <span class="trend">Estável</span>
-            </div>
-            <div class="stat-card animate-up" style="animation-delay: 0.2s;">
-                <h3>Devs Ativos</h3>
-                <p class="value">08</p>
-                <span class="trend">Online</span>
+    <main class="main-content">
+        <section id="overview" class="view-section active">
+            <h1>Visão Geral</h1>
+            <div class="grid-stats">
+                <div class="stat-card"><h3>Total Investido</h3><p id="total-val">R$ 0,00</p></div>
+                <div class="stat-card"><h3>Updates</h3><p id="total-updates">0</p></div>
+                <div class="stat-card"><h3>Seu Cargo</h3><p id="user-role-display">Verificando...</p></div>
             </div>
         </section>
 
-        <section class="recent-activity animate-up" style="animation-delay: 0.3s;">
-            <div class="card-header">
-                <h2>Últimas Atualizações</h2>
-                <button class="btn-sm">Nova Postagem</button>
+        <section id="investments" class="view-section">
+            <h1>Investimentos</h1>
+            <div class="stat-card" style="margin-bottom: 2rem;">
+                <h3>Registrar Novo</h3>
+                <input type="text" id="inv-name" placeholder="Nome do Investimento">
+                <input type="number" id="inv-value" placeholder="Valor (R$)">
+                <button class="btn-primary" style="margin-top: 1rem;" onclick="addInvestment()">Salvar</button>
             </div>
-            <table class="modern-table">
-                <thead>
-                    <tr>
-                        <th>Título</th>
-                        <th>Data</th>
-                        <th>Autor</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody id="updates-list">
-                    </tbody>
+            <table class="data-table">
+                <thead><tr><th>Nome</th><th>Valor</th><th>Data</th></tr></thead>
+                <tbody id="list-inv"></tbody>
             </table>
         </section>
+
+        <section id="updates" class="view-section">
+            <h1>Atualizações do Jogo</h1>
+            <div class="stat-card" style="margin-bottom: 2rem;">
+                <input type="text" id="up-title" placeholder="Título da Versão">
+                <textarea id="up-desc" placeholder="O que mudou?"></textarea>
+                <button class="btn-primary" onclick="addUpdate()">Publicar Patch</button>
+            </div>
+            <div id="list-updates"></div>
+        </section>
     </main>
-    <script src="script.js"></script>
 </body>
-</html>
